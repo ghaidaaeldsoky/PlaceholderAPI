@@ -2,53 +2,101 @@
 
 //Get Posts By UserId
 function getPosts(userId) {
-  let request = new XMLHttpRequest();
-  request.open(
-    "GET",
-    "https://jsonplaceholder.typicode.com/posts?userId=" + userId
-  );
-  request.responseType = "json";
-  request.send();
-  request.onload = function () {
-    if (request.status >= 200 && request.status < 300) {
-      let posts = request.response;
-      document.getElementById("posts").innerHTML = "";
-      for (post of posts) {
-        let content = `<div id="post">
-                <h3>${post.title}</h3>
-                <h4>${post.body}</h4>
-            </div>`;
-        document.getElementById("posts").innerHTML += content;
+
+    //-----------Using Promises-----------
+    fetch("https://jsonplaceholder.typicode.com/posts?userId=" + userId)
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
       }
-      // console.log(request.response);
-    } else {
-      alert("ERROR");
-    }
-  };
+    })
+    .then((posts) => {
+        document.getElementById("posts").innerHTML = "";
+              for (post of posts) {
+                let content = `<div id="post">
+                        <h3>${post.title}</h3>
+                        <h4>${post.body}</h4>
+                    </div>`;
+                document.getElementById("posts").innerHTML += content;
+      }
+    });
+
+// -----------Using XMLHttpRequest-----------
+//   let request = new XMLHttpRequest();
+//   request.open(
+//     "GET",
+//     "https://jsonplaceholder.typicode.com/posts?userId=" + userId
+//   );
+//   request.responseType = "json";
+//   request.send();
+//   request.onload = function () {
+//     if (request.status >= 200 && request.status < 300) {
+//       let posts = request.response;
+//       document.getElementById("posts").innerHTML = "";
+//       for (post of posts) {
+//         let content = `<div id="post">
+//                 <h3>${post.title}</h3>
+//                 <h4>${post.body}</h4>
+//             </div>`;
+//         document.getElementById("posts").innerHTML += content;
+//       }
+//       // console.log(request.response);
+//     } else {
+//       alert("ERROR");
+//     }
+//   };
 }
 
 // Get Users By Clicking on it
 function getUsers() {
-  let request = new XMLHttpRequest();
-  request.open("GET", "https://jsonplaceholder.typicode.com/users");
-  request.responseType = "json";
-  request.send();
-  request.onload = function () {
-    if (request.status >= 200 && request.status < 300) {
-      let users = request.response;
+  //-----------Using Promises-----------
+
+  return new Promise((resolve,reject)=> {
+    fetch("https://jsonplaceholder.typicode.com/users")
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      else{
+        reject("Error with user Request");
+      }
+    })
+    .then((users) => {
       document.getElementById("users").innerHTML = "";
       for (user of users) {
         let content = `<div id="user" onclick="userClicked(${user.id},this)">
-            <h3>${user.name}</h3>
-            <h4>${user.email}</h4>
-          </div>`;
+              <h3>${user.name}</h3>
+              <h4>${user.email}</h4>
+            </div>`;
         document.getElementById("users").innerHTML += content;
       }
-      // console.log(request.response);
-    } else {
-      alert("ERROR");
-    }
-  };
+      resolve();
+    });
+
+  });
+  
+
+  // -----------Using XMLHttpRequest-----------
+  //   let request = new XMLHttpRequest();
+  //   request.open("GET", "https://jsonplaceholder.typicode.com/users");
+  //   request.responseType = "json";
+  //   request.send();
+  //   request.onload = function () {
+  //     if (request.status >= 200 && request.status < 300) {
+  //       let users = request.response;
+  //       document.getElementById("users").innerHTML = "";
+  //       for (user of users) {
+  //         let content = `<div id="user" onclick="userClicked(${user.id},this)">
+  //             <h3>${user.name}</h3>
+  //             <h4>${user.email}</h4>
+  //           </div>`;
+  //         document.getElementById("users").innerHTML += content;
+  //       }
+  //       // console.log(request.response);
+  //     } else {
+  //       alert("ERROR");
+  //     }
+  //   };
 }
 
 // Handle when click (User Selected) => Show the User posts
@@ -64,5 +112,12 @@ function userClicked(id, el) {
   getPosts(id);
 }
 
-getPosts(1); // By default
-getUsers(); //Show Users
+// getPosts(1); // By default
+// getUsers(); //Show Users
+
+getUsers().then(()=> {
+    getPosts(1);
+}).catch((error)=> {
+    console.log(error);
+    alert(error);
+});
